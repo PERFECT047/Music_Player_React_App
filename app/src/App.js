@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 
 //Adding Component
 import Player from "./Components/Player";
@@ -12,17 +12,31 @@ import "./Styles/app.scss";
 import data from "./util";
 
 const App = () => {
+      //ref
+
+      const audioRef = useRef(null);
   
   //State
+  const [songInfo, setSongInfo] = useState({
+    currentTime: 0,
+    duration: 0,
+   });
   const [songs, setsongs] = useState(data());
   const [currentSong, setCurrentSong] = useState(songs[0]);
   const [isPlaying, setIsPlaying] = useState(false);
 
+  const timeUpdateHandler = (e) => {
+    const currentTime = e.target.currentTime;
+    const duration = e.target.duration;
+    setSongInfo({...songInfo, currentTime: currentTime, duration});
+ }
+
   return (
     <div className="App">
       <Song currentSong={currentSong} />
-      <Player isPlaying={isPlaying} setIsPlaying={setIsPlaying} currentSong={currentSong} />
-      <Library songs={songs} currentSong={currentSong}/>
+      <Player setSongInfo={setSongInfo} songInfo={songInfo} audioRef={audioRef} isPlaying={isPlaying} setIsPlaying={setIsPlaying} currentSong={currentSong} />
+      <Library isPlaying={isPlaying} audioRef={audioRef} songs={songs} setCurrentSong={setCurrentSong}/>
+      <audio onLoadedMetadata={timeUpdateHandler} onTimeUpdate={timeUpdateHandler} ref={audioRef} controls src={currentSong.audio}></audio>
     </div>
   );
 }
